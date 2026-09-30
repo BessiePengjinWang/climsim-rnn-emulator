@@ -1,0 +1,23 @@
+[project]
+name = "climsim-rnn"
+version = "0.1.0"
+description = "RNN emulator for ClimSim sub-grid atmospheric tendencies"
+requires-python = ">=3.10"
+dependencies = [
+    "tensorflow>=2.16",
+    "xarray>=2024.1",
+    "netCDF4",
+    "h5netcdf",
+    "scikit-learn",
+    "matplotlib",
+    "pandas",
+    "numpy",
+    "jupyter",
+]
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
