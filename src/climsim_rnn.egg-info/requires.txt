@@ -1,0 +1,9 @@
+tensorflow>=2.16
+xarray>=2024.1
+netCDF4
+h5netcdf
+scikit-learn
+matplotlib
+pandas
+numpy
+jupyter
