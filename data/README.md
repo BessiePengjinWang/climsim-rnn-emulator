@@ -14,4 +14,4 @@ To obtain it again:
   └── day2_output/  E3SM-MMF.mlo.0001-02-02-*.nc   (72 files)
   ```
 
-Day 1 is used for training, day 2 for validation — see [`notebooks/01_rnn_climate_tendency_emulator.ipynb`](../notebooks/01_rnn_climate_tendency_emulator.ipynb).
+Day 1 is used for training, day 2 for validation – see [`notebooks/01_rnn_climate_tendency_emulator.ipynb`](../notebooks/01_rnn_climate_tendency_emulator.ipynb).
