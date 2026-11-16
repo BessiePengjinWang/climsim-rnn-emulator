@@ -85,7 +85,7 @@ source .venv/bin/activate
 pip install -e .
 ```
 
-Data: place ClimSim's sample NetCDF files under `data/raw/` (not checked into git – see [`data/README.md`](data/README.md) for the expected layout and source). Then:
+Data: the ClimSim sample NetCDF files are included under `data/raw/` (see [`data/README.md`](data/README.md) for their source, license and layout), so there is nothing to download. Then:
 
 ```bash
 jupyter nbconvert --to notebook --execute --inplace notebooks/01_rnn_climate_tendency_emulator.ipynb
@@ -104,7 +104,7 @@ The notebook itself is generated from [`scripts/build_notebook.py`](scripts/buil
 ├── src/climsim_rnn/    data loading, preprocessing/normalization, model, metrics, baselines
 ├── notebooks/          the emulator walkthrough (01_rnn_climate_tendency_emulator.ipynb)
 ├── scripts/            build_notebook.py generates the notebook above
-├── data/               raw/ holds the NetCDF input (git-ignored except a .gitkeep, see data/README.md)
+├── data/               raw/ holds the NetCDF input, unmodified from ClimSim (CC BY 4.0, see data/README.md)
 ├── results/            figures/ and metrics/ produced by the notebook
 ├── reference/          ClimSim's published baseline metrics, with notes on what is comparable
 └── archive/            earlier drafts, kept for reference
