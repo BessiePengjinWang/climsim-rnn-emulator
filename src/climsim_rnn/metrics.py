@@ -6,6 +6,8 @@ from .preprocessing import LEVEL_TARGET_VARS, SCALAR_TARGET_VARS
 
 
 def _row(name: str, y_true: np.ndarray, y_pred: np.ndarray) -> dict:
+    if y_true.shape != y_pred.shape:
+        raise ValueError(f"Shape mismatch for {name}: truth {y_true.shape} vs prediction {y_pred.shape}")
     y_true = y_true.reshape(-1)
     y_pred = y_pred.reshape(-1)
     return {
