@@ -19,7 +19,7 @@ Trained on one day of ClimSim's low-resolution sample data (~25k column-timestep
 | PRECC | 2.0e-8 | 9.7e-8 | 9.3e-8 |
 | PRECSC | 2.1e-9 | 1.1e-8 | 7.5e-9 |
 
-R2 on the temperature tendency (`dT/dt`) is 0.58 and on the moisture tendency (`dq/dt`) is 0.15 – moisture is the harder target, consistent with what ClimSim's own baselines report. Full numbers: [`results/metrics/rnn_emulator_metrics.csv`](results/metrics/rnn_emulator_metrics.csv); training curve and per-variable error plots: [`results/figures/`](results/figures/). See [`notebooks/01_rnn_climate_tendency_emulator.ipynb`](notebooks/01_rnn_climate_tendency_emulator.ipynb) for the full walkthrough, including exactly which numbers are and aren't comparable to the archived baselines.
+R2 on the temperature tendency (`dT/dt`) is 0.58 and on the moisture tendency (`dq/dt`) is 0.15 – moisture is the harder target, consistent with what ClimSim's own baselines report. Full numbers: [`results/metrics/rnn_emulator_metrics.csv`](results/metrics/rnn_emulator_metrics.csv); training curve and per-variable error plots: [`results/figures/`](results/figures/). See [`notebooks/01_rnn_climate_tendency_emulator.ipynb`](notebooks/01_rnn_climate_tendency_emulator.ipynb) for the full walkthrough, including exactly which numbers are and aren't comparable to ClimSim's published baselines.
 
 ## Why a vertical-sequence RNN
 
@@ -61,5 +61,6 @@ The notebook itself is generated from [`scripts/build_notebook.py`](scripts/buil
 ├── scripts/            build_notebook.py generates the notebook above
 ├── data/                raw/ (git-ignored NetCDF input, see data/README.md)
 ├── results/             figures/ and metrics/ produced by the notebook
-└── archive/             earlier drafts and ClimSim's own baseline metrics, kept for reference
+├── reference/           ClimSim's published baseline metrics, with notes on what is comparable
+└── archive/             earlier drafts, kept for reference
 ```

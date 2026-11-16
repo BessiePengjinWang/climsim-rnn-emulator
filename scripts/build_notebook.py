@@ -185,7 +185,7 @@ cells.append(md(
     "",
     "Metrics are reported in physical units (K/s, kg/kg/s, W/m^2) after inverting the normalization, pooling "
     "over all levels and samples for the two level variables and over samples for the eight scalar surface "
-    "variables -- the same grouping ClimSim's own baseline evaluation uses (see `archive/*_data.csv`), so the "
+    "variables -- the same grouping ClimSim's own baseline evaluation uses (see `reference/climsim_published_baselines/*_data.csv`), so the "
     "two are directly comparable.",
 ))
 
@@ -204,7 +204,7 @@ cells.append(code(
 cells.append(md(
     "## Comparison against ClimSim's constant and linear-regression baselines",
     "",
-    "`archive/*_data.csv` holds MAE/RMSE/R2/bias for ClimSim's constant-prediction (`const`) and multiple "
+    "`reference/climsim_published_baselines/*_data.csv` holds MAE/RMSE/R2/bias for ClimSim's constant-prediction (`const`) and multiple "
     "linear regression (`mlr`) baselines, computed with ClimSim's official evaluation pipeline on ClimSim's "
     "own (much larger) scoring data split. Two caveats on comparing against them directly:",
     "",
@@ -219,7 +219,7 @@ cells.append(md(
 ))
 
 cells.append(code(
-    "ARCHIVE_DIR = Path(\"../archive\")",
+    "BASELINE_DIR = Path(\"../reference/climsim_published_baselines\")",
     "",
     "name_map = {\n"
     "    \"$dT/dt$\": \"dT/dt\",\n"
@@ -228,7 +228,7 @@ cells.append(code(
     "}",
     "",
     "def load_baseline(metric):",
-    "    df = pd.read_csv(ARCHIVE_DIR / f\"{metric}_data.csv\")",
+    "    df = pd.read_csv(BASELINE_DIR / f\"{metric}_data.csv\")",
     "    df[\"variable\"] = df[\"variable\"].replace(name_map)",
     "    return df.set_index(\"variable\")[[\"const\", \"mlr\"]].rename(",
     "        columns={\"const\": f\"{metric}_const\", \"mlr\": f\"{metric}_mlr\"}",
@@ -277,7 +277,7 @@ cells.append(md(
     "- **No energy-unit weighting.** ClimSim's official leaderboard weights tendencies by pressure-level "
     "thickness and grid-cell area to put every variable in a common energy unit before scoring. Metrics here "
     "are plain per-variable MAE/RMSE/R2/bias in each variable's native physical unit, which is enough to "
-    "compare against the archived baselines' orders of magnitude but not to submit to ClimSim's leaderboard.",
+    "compare against ClimSim's published baselines' orders of magnitude but not to submit to ClimSim's leaderboard.",
     "- **Architecture.** A 2-layer LSTM was a reasonable starting point given the vertical-sequence framing; "
     "it hasn't been tuned (units, depth, dropout, learning-rate schedule) or compared against non-recurrent "
     "alternatives (e.g. a plain MLP per level, or attention over levels).",
