@@ -430,6 +430,13 @@ cells.append(md(
     "- **Moisture tendency.** `dq/dt` is the weakest target: the RNN is only modestly better than linear regression "
     "on it. The per-level plot shows R2 reaching about 0.65 only around levels 25 to 32, while it stays below about "
     "0.1 over levels 45 to 54, where the largest share of the held-out variance sits.",
+    "- **Per-level standardization.** Each level's targets are scaled by that level's own standard deviation, so "
+    "the few levels near the top where `dq/dt` is almost always zero (training standard deviation between about "
+    "1e-14 and 1e-10) get the same weight in the training loss as levels that matter physically. Rare spikes there "
+    "become very large normalized values (up to about 160 in the seed-0 validation split), which inflates the "
+    "validation loss and makes its level differ between seeds. The reported metrics are in physical units, where "
+    "those levels contribute almost nothing. Scaling `dT/dt` and `dq/dt` by one standard deviation each, across all "
+    "levels, would avoid this and is a possible improvement.",
     "- **Architecture.** A 2-layer LSTM was a reasonable starting point given the vertical-sequence framing; "
     "it hasn't been tuned (units, depth, dropout, learning-rate schedule) or compared against non-recurrent "
     "alternatives (e.g. a plain MLP per level, or attention over levels).",
