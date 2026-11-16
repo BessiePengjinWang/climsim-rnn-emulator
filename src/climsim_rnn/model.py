@@ -13,7 +13,8 @@ def build_model(
     """Two-headed LSTM emulator over one atmospheric column.
 
     The vertical levels form the sequence axis (adjacent levels are physically
-    coupled by convection/mixing), so an LSTM reads bottom-to-top per column.
+    coupled by convection/mixing), so an LSTM reads top-to-bottom per column
+    (level 0 is the top of the atmosphere, level 59 is next to the surface).
     Surface/whole-column scalars (pressure, insolation, surface fluxes) don't
     vary by level, so they're broadcast into the sequence input and additionally
     fed into a small dense head off the LSTM's final state for the scalar
