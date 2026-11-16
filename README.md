@@ -4,6 +4,38 @@
 
 [ClimSim](https://leap-stc.github.io/ClimSim/README.html) is a large hybrid ML-physics dataset from Columbia's [LEAP Center](https://leap.columbia.edu): given one atmospheric column's state, predict the sub-grid physics tendencies a high-resolution simulation would produce ([dataset paper](https://arxiv.org/abs/2306.08754)). This project is my exploration of the emulation problem – an RNN that reads each atmospheric column's 60 vertical levels as a sequence and predicts the tendencies and surface fluxes for that column.
 
+## Variables
+
+The model takes one atmospheric column (a vertical stack of 60 levels, where level 0 is the top of the atmosphere and level 59 is next to the surface) and predicts how it changes over the next 1200 s. Descriptions follow [ClimSim's variable table](https://github.com/leap-stc/ClimSim/blob/main/website/models.md).
+
+Inputs:
+
+| Short name | Name in the data files | Meaning | Units | Values per column |
+|---|---|---|---|---|
+| T | `state_t` | Air temperature | K | 60 (one per level) |
+| q | `state_q0001` | Specific humidity (mass of water vapour per mass of air) | kg/kg | 60 |
+| PS | `state_ps` | Surface pressure | Pa | 1 |
+| SOLIN | `pbuf_SOLIN` | Solar insolation (sunlight arriving at the top of the atmosphere) | W/m^2 | 1 |
+| LHFLX | `pbuf_LHFLX` | Surface latent heat flux | W/m^2 | 1 |
+| SHFLX | `pbuf_SHFLX` | Surface sensible heat flux | W/m^2 | 1 |
+
+Targets (what the model predicts):
+
+| Short name | Name in the data files | Meaning | Units | Values per column |
+|---|---|---|---|---|
+| dT/dt | derived from `state_t` | Heating tendency: (output temperature - input temperature) / 1200 s | K/s | 60 |
+| dq/dt | derived from `state_q0001` | Moistening tendency: (output humidity - input humidity) / 1200 s | kg/kg/s | 60 |
+| NETSW | `cam_out_NETSW` | Net surface shortwave flux | W/m^2 | 1 |
+| FLWDS | `cam_out_FLWDS` | Downward surface longwave flux | W/m^2 | 1 |
+| PRECSC | `cam_out_PRECSC` | Snow rate | m/s | 1 |
+| PRECC | `cam_out_PRECC` | Rain rate | m/s | 1 |
+| SOLS | `cam_out_SOLS` | Visible direct solar flux | W/m^2 | 1 |
+| SOLL | `cam_out_SOLL` | Near-IR direct solar flux | W/m^2 | 1 |
+| SOLSD | `cam_out_SOLSD` | Visible diffuse solar flux | W/m^2 | 1 |
+| SOLLD | `cam_out_SOLLD` | Near-IR diffuse solar flux | W/m^2 | 1 |
+
+"Direct" solar flux is sunlight that reaches the surface without being scattered, "diffuse" is sunlight that has been scattered by the atmosphere and clouds, and the last four are the part of the surface solar flux in the visible and in the near-infrared bands. The eight rows from NETSW to SOLLD are the "surface variables" and `dT/dt` and `dq/dt` are the "tendencies" referred to below.
+
 ## Result
 
 Trained on one day of ClimSim's low-resolution sample data (~25k column-timesteps after a 90/10 train/val split) and evaluated on a second, entirely held-out day (~27.6k column-timesteps), the RNN has lower MAE and higher R2 than both a constant baseline and a linear-regression baseline on all ten targets. Both baselines are trained on the same data and scored with the same code. Each RNN number is the mean of three seeds with the range in brackets; a seed changes both the network initialization and the 90/10 split.
