@@ -19,7 +19,7 @@ SCALAR_TARGET_VARS = [
 ]
 
 _LEVEL_STATE_VARS = ["state_t", "state_q0001"]  # source vars for the tendency targets above
-EPS = 1e-8
+EPS = float(np.finfo(np.float64).eps)
 
 
 @dataclass
@@ -108,10 +108,10 @@ class Normalizer:
         return self.fit(batch).transform(batch)
 
     def inverse_transform_level_targets(self, arr: np.ndarray) -> np.ndarray:
-        return arr * self._level_target.std + self._level_target.mean
+        return arr * np.maximum(self._level_target.std, EPS) + self._level_target.mean
 
     def inverse_transform_scalar_targets(self, arr: np.ndarray) -> np.ndarray:
-        return arr * self._scalar_target.std + self._scalar_target.mean
+        return arr * np.maximum(self._scalar_target.std, EPS) + self._scalar_target.mean
 
     @staticmethod
     def _standardize(arr: np.ndarray, stats: _Stats) -> np.ndarray:
