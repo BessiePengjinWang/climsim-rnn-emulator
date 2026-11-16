@@ -379,9 +379,13 @@ cells.append(md(
     "scoring data. Only part of it is comparable to this notebook (see the README in that folder):",
     "",
     "- The MAE of the six radiation variables is in the same units, so the baselines above should land close to the "
-    "published values. The table below checks this.",
-    "- `PRECC` and `PRECSC` appear to be in different units, `dT/dt` and `dq/dt` are reported in ClimSim's "
-    "energy-weighted units, and the published R2 uses a different aggregation, so none of those are compared.",
+    "published values; ClimSim also area-weights every variable and this notebook does not. The table below checks "
+    "this.",
+    "- `PRECC` and `PRECSC` are published in W/m^2 (ClimSim multiplies them by the latent heat of evaporation times "
+    "the density of water, 2.501e9), so they become comparable after dividing the published values by that factor, "
+    "but they are not included in the table below. `dT/dt` and `dq/dt` are published in ClimSim's mass- and "
+    "energy-weighted units, and the published RMSE and R2 are averaged per grid column over time rather than pooled, "
+    "so none of those are compared.",
 ))
 
 cells.append(code(
