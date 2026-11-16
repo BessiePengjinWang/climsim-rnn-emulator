@@ -6,20 +6,28 @@
 
 ## Result
 
-Trained on one day of ClimSim's low-resolution sample data (~25k column-timesteps after a 90/10 train/val split) and evaluated on a second, entirely held-out day (~27.6k column-timesteps), the model beats ClimSim's own constant-prediction and linear-regression baselines on every one of the eight scalar surface variables it was compared against, most by an order of magnitude or more in MAE:
+Trained on one day of ClimSim's low-resolution sample data (~25k column-timesteps after a 90/10 train/val split) and evaluated on a second, entirely held-out day (~27.6k column-timesteps), the RNN has lower MAE and higher R2 than both a constant baseline and a linear-regression baseline on all ten targets. Both baselines are trained on the same data and scored with the same code. Each RNN number is the mean of three seeds with the range in brackets; a seed changes both the network initialization and the 90/10 split.
 
-| variable | MAE (this model) | MAE (ClimSim `const` baseline) | MAE (ClimSim `mlr` baseline) |
-|---|---|---|---|
-| NETSW | 30.1 | 195.8 | 63.0 |
-| FLWDS | 9.4 | 58.4 | 12.3 |
-| SOLS | 16.1 | 83.1 | 37.2 |
-| SOLL | 18.7 | 89.0 | 40.0 |
-| SOLSD | 8.4 | 37.3 | 12.8 |
-| SOLLD | 7.6 | 21.6 | 12.0 |
-| PRECC | 2.0e-8 | 9.7e-8 | 9.3e-8 |
-| PRECSC | 2.1e-9 | 1.1e-8 | 7.5e-9 |
+| variable | MAE, RNN (mean of 3 seeds, range) | MAE, linear regression | MAE, constant | R2, RNN | R2, linear regression |
+|---|---|---|---|---|---|
+| dT/dt | 1.75e-5 (1.73e-5 to 1.78e-5) | 2.17e-5 | 3.16e-5 | 0.57 | 0.48 |
+| dq/dt | 1.03e-8 (1.02e-8 to 1.04e-8) | 1.15e-8 | 1.13e-8 | 0.15 | 0.13 |
+| NETSW | 30.2 (29.4 to 30.6) | 69 | 203 | 0.96 | 0.86 |
+| FLWDS | 9.51 (9.38 to 9.73) | 12.3 | 62.6 | 0.97 | 0.96 |
+| PRECSC | 2.06e-9 (1.99e-9 to 2.14e-9) | 4.31e-9 | 4.91e-9 | 0.63 | 0.28 |
+| PRECC | 2.16e-8 (2.04e-8 to 2.22e-8) | 4.51e-8 | 4.14e-8 | 0.66 | 0.33 |
+| SOLS | 15.8 (15.4 to 16) | 40 | 86.1 | 0.93 | 0.76 |
+| SOLL | 18.4 (18.2 to 18.6) | 43.7 | 93.2 | 0.92 | 0.75 |
+| SOLSD | 8.2 (7.92 to 8.45) | 13.7 | 38.3 | 0.90 | 0.80 |
+| SOLLD | 7.38 (7.18 to 7.55) | 12.7 | 22.2 | 0.78 | 0.60 |
 
-R2 on the temperature tendency (`dT/dt`) is 0.58 and on the moisture tendency (`dq/dt`) is 0.15 – moisture is the harder target, consistent with what ClimSim's own baselines report. Full numbers: [`results/metrics/rnn_emulator_metrics.csv`](results/metrics/rnn_emulator_metrics.csv); training curve and per-variable error plots: [`results/figures/`](results/figures/). See [`notebooks/01_rnn_climate_tendency_emulator.ipynb`](notebooks/01_rnn_climate_tendency_emulator.ipynb) for the full walkthrough, including exactly which numbers are and aren't comparable to ClimSim's published baselines.
+Compared with linear regression the MAE is 1.1 to 2.5 times lower, and compared with the constant baseline 1.1 to 6.7 times lower. The moisture tendency `dq/dt` is the weakest target: its MAE is 11% below linear regression and its R2 is 0.15 against 0.13. MAE varies by up to about 8% between seeds, so small differences should not be over-read.
+
+R2 for `dT/dt` and `dq/dt` pools all 60 levels together. Scored level by level, R2 runs from about 0.1 to 0.98 for `dT/dt` and from about -0.1 to 0.7 for `dq/dt` (levels where the target is constant are left out), and the mean of the per-level values is 0.50 and 0.23 respectively; see [`results/figures/r2_per_level.png`](results/figures/r2_per_level.png).
+
+ClimSim's own published baseline numbers are kept in [`reference/climsim_published_baselines/`](reference/climsim_published_baselines/). Only the MAE of the six radiation variables is directly comparable to this repo's, and the baselines trained here land within 10% of those published values. The other published columns use different units or a different aggregation; the README in that folder explains which and why.
+
+Full numbers: [`results/metrics/rnn_emulator_metrics.csv`](results/metrics/rnn_emulator_metrics.csv) (summary over seeds), [`rnn_emulator_metrics_by_seed.csv`](results/metrics/rnn_emulator_metrics_by_seed.csv) and [`baseline_metrics.csv`](results/metrics/baseline_metrics.csv); plots in [`results/figures/`](results/figures/). See [`notebooks/01_rnn_climate_tendency_emulator.ipynb`](notebooks/01_rnn_climate_tendency_emulator.ipynb) for the full walkthrough.
 
 ## Why a vertical-sequence RNN
 
@@ -31,7 +39,10 @@ The redesign here instead treats each `(timestep, grid column)` pair as one samp
 
 - Two days of sample data. This demonstrates the approach; it isn't tuned or competitive at the scale of ClimSim's full multi-year dataset.
 - Minimal feature set: temperature, humidity, surface pressure, and three surface fluxes as input – not ClimSim's full input specification (winds, ozone, additional moisture species, etc.).
-- No energy-unit weighting: ClimSim's official leaderboard weights tendencies by pressure-level thickness and grid-cell area before scoring; this repo reports plain per-variable MAE/RMSE/R2/bias in native physical units instead (see the notebook for exactly which comparisons that does and doesn't affect).
+- No energy-unit weighting: ClimSim's official leaderboard weights tendencies by pressure-level thickness and grid-cell area before scoring; this repo reports plain per-variable MAE/RMSE/R2/bias in native physical units instead, so its numbers cannot be submitted to that leaderboard or compared with its energy-weighted values.
+- Seed variation: MAE moves by up to about 8% between seeds and the held-out set is a single day, which is why the table gives a mean and a range over three seeds.
+- Training length: training is capped at 40 epochs and all three seeds reached the cap. A single-seed check with a cap of 200 epochs let early stopping end the run at epoch 62, and held-out MAE then changed by between -6% and +5% across the ten targets, within the spread between seeds, so the cap does not appear to limit the results.
+- Per-level standardization: each level's targets are scaled by that level's own standard deviation, so the few near-top levels where `dq/dt` is almost always zero get the same weight in the training loss as physically important levels. This makes the validation loss noisy and seed dependent but contributes almost nothing to the reported metrics. Scaling by one standard deviation per tendency would avoid it.
 - The 2-layer LSTM architecture is a reasonable starting point for the vertical-sequence framing, not a tuned or benchmarked one.
 
 ## Reproducing this
@@ -48,19 +59,21 @@ Data: place ClimSim's sample NetCDF files under `data/raw/` (not checked into gi
 jupyter nbconvert --to notebook --execute --inplace notebooks/01_rnn_climate_tendency_emulator.ipynb
 ```
 
-This regenerates `results/metrics/rnn_emulator_metrics.csv` and the figures under `results/figures/`. Ran end-to-end on Python 3.12 / TensorFlow 2.21 / xarray 2026.7 (CPU, Apple Silicon) in about 8 minutes.
+This regenerates the three CSV files under `results/metrics/` and the three figures under `results/figures/`. A fresh clone with a fresh virtual environment, following exactly these steps, installed in under a minute and executed the notebook end to end in about 22 minutes (CPU, Apple Silicon) with Python 3.12.12, TensorFlow 2.21.0, xarray 2026.9.0, numpy 2.5.5, pandas 3.1.1 and scikit-learn 1.9.1.
 
-The notebook itself is generated from [`scripts/build_notebook.py`](scripts/build_notebook.py) – that script is the source of truth for its content; edit it and re-run rather than hand-editing the `.ipynb`.
+Neural-network training is not bit-for-bit repeatable, even with fixed seeds, so regenerated numbers will differ slightly from those above. In that clean re-run the three-seed mean MAE moved by at most about 2%, R2 by at most 0.011, and the two baselines were identical; a single run of one seed moved by up to about 6.5%.
+
+The notebook itself is generated from [`scripts/build_notebook.py`](scripts/build_notebook.py) – that script is the source of truth for its content; edit it and re-run rather than hand-editing the `.ipynb`. Running it clears the notebook's stored outputs, so execute the notebook afterwards.
 
 ## Repository structure
 
 ```
 .
-├── src/climsim_rnn/    data loading, preprocessing/normalization, model, metrics
+├── src/climsim_rnn/    data loading, preprocessing/normalization, model, metrics, baselines
 ├── notebooks/          the emulator walkthrough (01_rnn_climate_tendency_emulator.ipynb)
 ├── scripts/            build_notebook.py generates the notebook above
-├── data/                raw/ (git-ignored NetCDF input, see data/README.md)
-├── results/             figures/ and metrics/ produced by the notebook
-├── reference/           ClimSim's published baseline metrics, with notes on what is comparable
-└── archive/             earlier drafts, kept for reference
+├── data/               raw/ holds the NetCDF input (git-ignored except a .gitkeep, see data/README.md)
+├── results/            figures/ and metrics/ produced by the notebook
+├── reference/          ClimSim's published baseline metrics, with notes on what is comparable
+└── archive/            earlier drafts, kept for reference
 ```
