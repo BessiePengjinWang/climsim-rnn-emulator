@@ -27,14 +27,14 @@ def evaluate(
 ) -> pd.DataFrame:
     """Per-variable MAE/RMSE/R2/bias in physical units.
 
-    Level variables (dT/dt, dq/dt) are pooled across all levels and samples;
-    scalar surface variables are pooled across samples only. This mirrors the
-    variable groupings ClimSim's own baseline evaluation reports (see
-    archive/*_data.csv). The scalar variables are in the same native units in
-    both places, so MAE/RMSE are directly comparable; dT/dt and dq/dt are not,
-    since ClimSim's official pipeline reports those after an energy-unit
-    (pressure/area-weighted, W/m^2) conversion that isn't reproduced here --
-    R2 is the safer cross-check for those two.
+    Level variables (dT/dt, dq/dt) are pooled across all levels and samples, so
+    their R2 is measured against the variance of the pooled values and is
+    dominated by the high-variance levels; the mean of per-level R2 can differ
+    noticeably. Scalar surface variables are pooled across samples only. Bias is
+    mean(prediction - truth), so a positive value means over-prediction.
+
+    Only some of ClimSim's published baseline metrics are comparable to these;
+    see reference/climsim_published_baselines/README.md for which.
     """
     rows = [
         _row(name, level_true[..., i], level_pred[..., i]) for i, name in enumerate(LEVEL_TARGET_VARS)
